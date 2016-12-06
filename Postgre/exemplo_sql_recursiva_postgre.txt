@@ -1,0 +1,12 @@
+CREATE OR REPLACE FUNCTION tree(integer) 
+RETURNS SETOF groups AS $BODY$ 
+declare result record; child record; 
+temp record; begin select into 
+result * from users 
+where user_id = $1; if found then 
+for child in select distinct user_id from users 
+where parent_id = $1 loop for temp in select * from 
+tree(child.group_id) loop return next temp; end loop; e
+nd loop; end if; return next result; end; $BODY$ 
+LANGUAGE plpgsql VOLATILE COST 100 ROWS 1000; 
+ALTER FUNCTION tree(integer) OWNER TO postgres; 
